@@ -12,4 +12,5 @@ public abstract class Account
 	public abstract void addToHistory(String text);
 	
 	
+	
 }

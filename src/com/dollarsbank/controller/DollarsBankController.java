@@ -10,6 +10,8 @@ import javax.naming.directory.InitialDirContext;
 
 import com.dollarsbank.model.Customer;
 import com.dollarsbank.utility.ConsolePrinterUtility;
+import com.dollarsbank.utility.DataGeneratorStubUtility;
+import com.dollarsbank.utility.EncryptionUtility;
 
 public class DollarsBankController
 {
@@ -24,8 +26,33 @@ public class DollarsBankController
 	int option = 0;
 	//Helps display Sysout console prompts
 	public static ConsolePrinterUtility cpu = new ConsolePrinterUtility();
+	public static DataGeneratorStubUtility dgsu = new DataGeneratorStubUtility();
+	public EncryptionUtility en = new EncryptionUtility();
 	Scanner scan = new Scanner(System.in);
 
+	private boolean passCheck(String password)
+	{
+		int grade = 0;
+		//length >= 8
+		if(password.length() >= 8)
+			grade++;
+		// contains at least 1 digit
+		if(password.matches("(?=.*[0-9]).*"))
+			grade++;
+		// contains at least 1 lower case
+		if(password.matches("(?=.*[a-z]).*"))
+			grade++;
+		// contains at least 1 upper case
+		if(password.matches("(?=.*[A-Z]).*"))
+			grade++;
+		// contains at least 1 special char
+		if(password.matches("(?=.*[~!@#$%^&*()_-]).*"))
+			grade++;
+		if(grade == 5)
+			return true;
+		else
+			return false;
+	}
 	public Boolean run()
 	{
 
@@ -46,11 +73,15 @@ public class DollarsBankController
 		switch (option)
 		{
 			case 1:
+				System.out.println();
 				createAccount();
+				System.out.println();
 				scan.reset();
 				break;
 			case 2:
+				System.out.println();
 				login();
+				System.out.println();
 				scan.reset();
 				break;
 			case 3:
@@ -61,7 +92,7 @@ public class DollarsBankController
 	
 				break;
 		}
-
+		
 		System.out.flush();
 
 		return true;
@@ -77,7 +108,7 @@ public class DollarsBankController
 		String password = "";
 		double initalDeposit = 0;
 
-		cpu.createAccount();
+		
 		try
 		{
 			//TODO: prevent creating multiple customers with same user id
@@ -95,21 +126,42 @@ public class DollarsBankController
 			userId = scan.nextLine();
 			System.out.println("Password: 8 Characters with Lower, Upper & special");
 			password = scan.nextLine();
-			System.out.println("Initial Deposit Amount: ");
-			initalDeposit = scan.nextDouble();
-			scan.nextLine();
-			// Database
-			// custDao.addCustomer(new
-			// Customer(name,address,contactNumber,userId,password,initalDeposit));
-			// ArrayList Collection
-			list.add(new Customer(name, address, contactNumber, userId, password, initalDeposit));
-			// list..toString();
-			System.out.println(list.toString());
+			if(passCheck(password))
+			{
+				
+				System.out.println("Password looks good!");
+				System.out.println("Initial Deposit Amount: ");
+				try
+				{
+					//TODO: fix encryption Throwing Exception
+					//System.out.println(en.encrypt(password));
+				} catch (Exception e)
+				{
+					System.out.println("Error with encryption");
+					// TODO: handle exception
+				}
+					
+				
+				initalDeposit = scan.nextDouble();
+				scan.nextLine();
+				// Database
+				// custDao.addCustomer(new
+				// Customer(name,address,contactNumber,userId,password,initalDeposit));
+				// ArrayList Collection
+				list.add(new Customer(name, address, contactNumber, userId, password, initalDeposit));
+				
+			}
+			else 
+			{
+				System.out.println("Password needs to be 8 Characters with Lower, Upper & special");
+			}
+			
+			
 		} catch (InputMismatchException ime)
 		{
 
 		}
-		System.out.println(list.get(0).getCustName());
+		
 
 	}
 
@@ -129,6 +181,7 @@ public class DollarsBankController
 		{
 			if (customer.getUserId().equalsIgnoreCase(userId) && customer.getPassword().equalsIgnoreCase(password))
 			{
+				System.out.println();
 				loginSuccess(iterator);
 				logout = true;
 				break;
@@ -162,116 +215,115 @@ public class DollarsBankController
 				loginOption = scan.nextInt();
 				scan.nextLine();
 				//System.out.println(loginOption);
+		
+				switch (loginOption)
+				{
+					case 1:
+						//Deposit
+						System.out.println("How much would you like to deposit? :");
+						
+							amount = scan.nextDouble();
+							scan.nextLine();
+							if(amount >= 0)
+							{
+								list.get(iterator).deposit(amount);
+								System.out.println("Deposit successful, your current balance is: " + list.get(iterator).getBalance());
+								
+							}
+							else
+							{
+								System.out.println("Invalid input, please insert 0-> (Big Number)");
+							}
+						
+					
+						break;
+					case 2:
+						//withdraw
+						System.out.println("How much would you like to withdraw? :");
+						
+							amount = scan.nextDouble();
+							scan.nextLine();
+							if(amount >= 0 && amount <= list.get(iterator).getBalance())
+							{
+								list.get(iterator).withdraw(amount);
+								System.out.println("Withdraw successful, your current balance is: " + list.get(iterator).getBalance());
+								
+							}
+							else
+							{
+								System.out.println("Invalid input, please insert 0-> (Funds you have)\n"
+										+ "your total funds =["+list.get(iterator).getBalance());
+							}
+						
+						break;
+					case 3:
+						int transferCount = 0;
+						int listPos = 0;
+						boolean transferable = false;
+						String userId = "";
+						//funds transfer  EX: from a to b, or b to a
+						System.out.println("Who are you wanting to transfer with? User Id: ");
+						
+							userId = scan.nextLine().toLowerCase();
+							for (Customer customer : list)
+							{
+								if(customer.getUserId().contentEquals(userId))
+								{
+									transferable = true;
+									listPos = transferCount ;
+								}
+								transferCount++;
+							}
+							if(!transferable)
+							{
+		
+								System.out.println("User doesn't exist! ");
+								break;
+								
+							}
+							System.out.println("How much are you transfering to " + userId);
+							amount = scan.nextDouble();
+							scan.nextLine();
+							if(amount >= 0 && amount <= list.get(iterator).getBalance())
+							{
+								list.get(listPos).deposit(list.get(iterator).transfer(amount,list.get(listPos).getUserId()));
+								System.out.println("Transfer successful, your current balance is: " + list.get(iterator).getBalance());
+								
+							}
+							else
+							{
+								System.out.println("Invalid input, please insert 0-> (Funds you have)\n"
+										+ "your total funds =["+list.get(iterator).getBalance());
+							}
+						
+						
+						break;
+					case 4:
+						System.out.println();
+						list.get(iterator).printHistory();
+						System.out.println();
+						break;
+					case 5:
+						cpu.displayCustomerInfo(list.get(iterator));
+						break;
+					case 6:
+						dgsu.generateStub(list.get(iterator));
+						break;
+					case 7:
+						signOut=true;
+						break;
+					default:
+						
+						break;
+				}
+				
 			}catch (InputMismatchException e) {
 				scan.nextLine();
 				loginOption = 0;
 				cpu.invalidOption();
 				
 			}
-			switch (loginOption)
-			{
-				case 1:
-					//Deposit
-					System.out.println("How much would you like to deposit? :");
-					try {
-						amount = scan.nextDouble();
-						scan.nextLine();
-						if(amount >= 0)
-						{
-							list.get(iterator).deposit(amount);
-							System.out.println("Deposit successful, your current balance is: " + list.get(iterator).getBalance());
-							
-						}
-						else
-						{
-							System.out.println("Invalid input, please insert 0-> (Big Number)");
-						}
-					}catch (InputMismatchException inMisExcDepo) {
-						scan.nextLine();
-					}
-				
-					break;
-				case 2:
-					//withdraw
-					System.out.println("How much would you like to withdraw? :");
-					try {
-						amount = scan.nextDouble();
-						scan.nextLine();
-						if(amount >= 0 && amount <= list.get(iterator).getBalance())
-						{
-							list.get(iterator).withdraw(amount);
-							System.out.println("Withdraw successful, your current balance is: " + list.get(iterator).getBalance());
-							
-						}
-						else
-						{
-							System.out.println("Invalid input, please insert 0-> (Funds you have)\n"
-									+ "your total funds =["+list.get(iterator).getBalance());
-						}
-					}catch (InputMismatchException inMisExcWithdrawl) {
-						scan.nextLine();
-					}
-					break;
-				case 3:
-					int transferCount = 0;
-					int listPos = 0;
-					boolean transferable = false;
-					String userId = "";
-					//funds transfer  EX: from a to b, or b to a
-					System.out.println("Who are you wanting to transfer with? User Id: ");
-					try {
-						userId = scan.nextLine().toLowerCase();
-						for (Customer customer : list)
-						{
-							if(customer.getUserId().contentEquals(userId))
-							{
-								transferable = true;
-								listPos = transferCount ;
-							}
-							transferCount++;
-						}
-						if(!transferable)
-						{
-	
-							System.out.println("User doesn't exist! ");
-							break;
-							
-						}
-						System.out.println("How much are you transfering to " + userId);
-						amount = scan.nextDouble();
-						scan.nextLine();
-						if(amount >= 0 && amount <= list.get(iterator).getBalance())
-						{
-							list.get(listPos).deposit(list.get(iterator).transfer(amount,list.get(listPos).getUserId()));
-							System.out.println("Transfer successful, your current balance is: " + list.get(iterator).getBalance());
-							
-						}
-						else
-						{
-							System.out.println("Invalid input, please insert 0-> (Funds you have)\n"
-									+ "your total funds =["+list.get(iterator).getBalance());
-						}
-					}catch(InputMismatchException inMisExc)
-					{
-						scan.nextLine();
-					}
-					
-					break;
-				case 4:
-					list.get(iterator).printHistory();
-					break;
-				case 5:
-					list.get(iterator).accountDetails();
-					System.out.println("HI");
-					break;
-				case 6:
-					signOut=true;
-					break;
-					
-				default:
-					
-					break;
-			}
+			
 		}
 	}
 

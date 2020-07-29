@@ -10,13 +10,25 @@ public class SavingsAccount extends Account
 	private double balance;
 	private String userId;
 	private String password;
+
+
 	private List<String> transactionHistory = new ArrayList<String>();
+	
 	public SavingsAccount()
 	{
 		super();
 		
 	}
 
+	public List<String> getTransactionHistory()
+	{
+		return transactionHistory;
+	}
+	
+	public void setTransactionHistory(List<String> transactionHistory)
+	{
+		this.transactionHistory = transactionHistory;
+	}
 	@Override
 	public void deposit(double amount)
 	{
@@ -90,12 +102,12 @@ public class SavingsAccount extends Account
 	@Override
 	public void printHistory()
 	{
-		// TODO Auto-generated method stub
 		for (String string : transactionHistory)
 		{
 			System.out.println(string);
 		}
 	}
+	
 
 	@Override
 	public void addToHistory(String text)

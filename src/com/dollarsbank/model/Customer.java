@@ -26,17 +26,13 @@ public class Customer extends SavingsAccount
 	}
 	
 	//TODO: Fix toString
-//	public String toString()
-//	{
-//		
-//		return "Customer [custName=" + custName + ", custAddress=" + custAddress + ", contactNumber=" + contactNumber
-//				+ "]"+ "{Account info [[ UserId= "+getUserId()+" " +"UserPass= " +getPassword()+ "]]  }";
-//	}
-	public String accountDetails()
+	public String toString()
 	{
-		return "Customer [custName=" + custName ;// ", custAddress=" + custAddress + ", contactNumber=" + contactNumber
-			//+ "]"+ "{Account info [[ UserId= "+getUserId()+" " +"UserPass= " +getPassword()+ "]]  }";
+		
+		return "Customer [custName=" + custName + ", custAddress=" + custAddress + ", contactNumber=" + contactNumber
+				+ "]"+ "{Account info [[ UserId= "+getUserId()+" " +"UserPass= " +getPassword()+ "]]  }";
 	}
+	
 	public String getCustName()
 	{
 		return custName;
