@@ -15,19 +15,25 @@ import com.dollarsbank.utility.EncryptionUtility;
 
 public class DollarsBankController
 {
+	public EncryptionUtility en = new EncryptionUtility();
 	//Without a database using Static list/block to instantiate some users and init deposits
 	public static List<Customer> list = new ArrayList<Customer>();
 	static {
-		list.add(new Customer("Josh", "4003 Valley Green ct"
-				, "832-409-9637", "a", "a", 30.2));
-		list.add(new Customer("mark", "Somewhere in AZ"
-				, "832-222-5555", "b", "b", 302222.2));
+		try {
+			EncryptionUtility en = new EncryptionUtility();
+			list.add(new Customer("Josh", "4003 Valley Green ct"
+					, "832-409-9637", "a", en.encrypt("a") , 30.2));
+			list.add(new Customer("mark", "Somewhere in AZ"
+					, "832-222-5555", "b", en.encrypt("b"), 302222.2));
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
+		
 	}
 	int option = 0;
 	//Helps display Sysout console prompts
 	public static ConsolePrinterUtility cpu = new ConsolePrinterUtility();
 	public static DataGeneratorStubUtility dgsu = new DataGeneratorStubUtility();
-	public EncryptionUtility en = new EncryptionUtility();
 	Scanner scan = new Scanner(System.in);
 
 	private boolean passCheck(String password)
@@ -134,10 +140,16 @@ public class DollarsBankController
 				try
 				{
 					//TODO: fix encryption Throwing Exception
-					//System.out.println(en.encrypt(password));
+					password = en.encrypt(password);
+					System.out.println(password);
+					
+					//Testing Decryption
+					System.out.println("Decrypting pass...");
+					System.out.println("pass = " + en.decrypt(password));
 				} catch (Exception e)
 				{
 					System.out.println("Error with encryption");
+					e.printStackTrace();
 					// TODO: handle exception
 				}
 					
@@ -179,12 +191,19 @@ public class DollarsBankController
 
 		for (Customer customer : list)
 		{
-			if (customer.getUserId().equalsIgnoreCase(userId) && customer.getPassword().equalsIgnoreCase(password))
+			try
 			{
-				System.out.println();
-				loginSuccess(iterator);
-				logout = true;
-				break;
+				if (customer.getUserId().equalsIgnoreCase(userId) && en.decrypt(customer.getPassword()).equalsIgnoreCase(password))
+				{
+					System.out.println();
+					loginSuccess(iterator);
+					logout = true;
+					break;
+				}
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			iterator++;
 		}
