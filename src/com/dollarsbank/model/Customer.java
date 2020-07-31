@@ -18,7 +18,9 @@ public class Customer extends SavingsAccount
 		setPassword(password);
 		deposit(amount);
 		addToHistory("Initial Deposit Amount in account ["+userId+"]\n"
-				+ "Balance - " + amount + " as of " + ldt);
+				+ "Balance - " + amount + " as of "  +ldt.getDayOfWeek()+" "
+				+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
+				+" " +" "+ldt.getYear());
 	}
 	public Customer()
 	{

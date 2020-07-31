@@ -39,7 +39,9 @@ public class SavingsAccount extends Account
 		else
 		{
 			addToHistory("Deposited " + amount + " into account ["+userId+"]\n"
-				+ "Balance - " + balance + " as of " + ldt);
+				+ "Balance - " + balance + " as of " +ldt.getDayOfWeek()+" "
+				+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
+				+" " +" "+ldt.getYear());
 		}
 		balance += amount;
 		
@@ -49,7 +51,9 @@ public class SavingsAccount extends Account
 	public void withdraw(double amount)
 	{
 		addToHistory("Withdrawn " + amount + " out of account ["+userId+"]\n"
-				+ "Balance - " + balance + " as of " + ldt);
+				+ "Balance - " + balance + " as of " +ldt.getDayOfWeek()+" "
+				+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
+				+" " +" "+ldt.getYear());
 		balance -= amount;
 		
 	}
@@ -94,7 +98,9 @@ public class SavingsAccount extends Account
 	{
 		
 		addToHistory("Transfered " + amount + " into account ["+receiverId+"]\n"
-				+ "as of" + ldt + " ");
+				+ "as of" +ldt.getDayOfWeek()+" "
+				+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
+				+" " +" "+ldt.getYear());
 		balance -= amount;
 		return amount;
 	}

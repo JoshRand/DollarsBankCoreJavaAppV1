@@ -141,11 +141,11 @@ public class DollarsBankController
 				{
 					//TODO: fix encryption Throwing Exception
 					password = en.encrypt(password);
-					System.out.println(password);
+					//System.out.println(password);
 					
 					//Testing Decryption
-					System.out.println("Decrypting pass...");
-					System.out.println("pass = " + en.decrypt(password));
+					//System.out.println("Decrypting pass...");
+					//System.out.println("pass = " + en.decrypt(password));
 				} catch (Exception e)
 				{
 					System.out.println("Error with encryption");
