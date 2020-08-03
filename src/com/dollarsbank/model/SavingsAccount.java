@@ -4,13 +4,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dollarsbank.dao.CustomerDao;
+import com.dollarsbank.dao.CustomerDaoImpl;
+
 public class SavingsAccount extends Account
 {
 	private LocalDateTime ldt = LocalDateTime.now();
 	private double balance;
 	private String userId;
 	private String password;
-
+	CustomerDaoImpl customerDao = new CustomerDaoImpl();
 
 	private List<String> transactionHistory = new ArrayList<String>();
 	
@@ -32,30 +35,46 @@ public class SavingsAccount extends Account
 	@Override
 	public void deposit(double amount)
 	{
-		if(transactionHistory.size()==0)
+		ldt = LocalDateTime.now();
+		//with collecitons
+		if(customerDao.getHistory(getUserId()).size() == 0)
 		{
-
+			balance += amount;
 		}
 		else
 		{
-			addToHistory("Deposited " + amount + " into account ["+userId+"]\n"
-				+ "Balance - " + balance + " as of " +ldt.getDayOfWeek()+" "
-				+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
-				+" " +" "+ldt.getYear());
-		}
 		balance += amount;
+		addToHistory("Deposited " + amount + " into account ["+userId+"]\n"
+			+ "Balance - " + balance + " as of " +ldt.getDayOfWeek()+" "
+			+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
+			+" " +" "+ldt.getYear());
+		
+		}
+		
 		
 	}
 
 	@Override
 	public void withdraw(double amount)
 	{
+		ldt = LocalDateTime.now();
+		balance -= amount;
 		addToHistory("Withdrawn " + amount + " out of account ["+userId+"]\n"
 				+ "Balance - " + balance + " as of " +ldt.getDayOfWeek()+" "
 				+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
 				+" " +" "+ldt.getYear());
-		balance -= amount;
 		
+	}
+	@Override
+	public double transfer(double amount, String receiverId)
+	{
+		ldt = LocalDateTime.now();
+		addToHistory("Transfered " + amount + " into account ["+receiverId+"]\n"
+				+ "as of " +ldt.getDayOfWeek()+" "
+				+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
+				+" " +" "+ldt.getYear());
+		balance -= amount;
+		return amount;
 	}
 	public double getBalance()
 	{
@@ -87,47 +106,74 @@ public class SavingsAccount extends Account
 		this.password = password;
 	}
 
-//	@Override
-//	public String toString()
-//	{
-//		return "SavingsAccount [balance=" + balance + ", userId=" + userId + ", password=" + password + "]";
-//	}
 
 	@Override
-	public double transfer(double amount, String receiverId)
+	public List<String> getHistory()
 	{
+		List<String> list = customerDao.getHistory(userId);
+		List<String> transactionHistory = new ArrayList<String>();
 		
-		addToHistory("Transfered " + amount + " into account ["+receiverId+"]\n"
-				+ "as of" +ldt.getDayOfWeek()+" "
-				+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
-				+" " +" "+ldt.getYear());
-		balance -= amount;
-		return amount;
+		int count = list.size();
+		int skipCount = 0;
+		if(count >= 5)
+		{
+			skipCount = count - 5;
+		}
+		for (String string : list)
+		{
+			if(skipCount > 0)
+			{
+				
+				skipCount--;
+				continue;
+			}
+			transactionHistory.add(string);
+			
+		}
+		return transactionHistory;
 	}
-
+	
 	@Override
 	public void printHistory()
 	{
-		for (String string : transactionHistory)
+		List<String> list = customerDao.getHistory(userId);
+		List<String> transactionHistory = new ArrayList<String>();
+		//System.out.println(list.toString());
+		int count = list.size();
+		int skipCount = 0;
+		if(count >= 5)
 		{
+			skipCount = count - 5;
+		}
+		for (String string : list)
+		{
+			if(skipCount > 0)
+			{
+				skipCount--;
+				continue;
+			}
 			System.out.println(string);
 		}
 	}
 	
 
 	@Override
-	public void addToHistory(String text)
+	public void addToHistory(String historyMessage)
 	{
 		
 		
 		if(transactionHistory.size() == 5)
 		{
-			transactionHistory.remove(0);
-			transactionHistory.add(text+" as of " + ldt);
+			//transactionHistory.remove(0);
+			//Without Database
+			//transactionHistory.add(historyMessage);
+			customerDao.saveHistory(userId,historyMessage);
+			
 		}
 		else
 		{
-			transactionHistory.add(text);
+			//transactionHistory.add(historyMessage);
+			customerDao.saveHistory(userId,historyMessage);
 		}
 		
 		

@@ -2,11 +2,15 @@ package com.dollarsbank.model;
 
 import java.time.LocalDateTime;
 
+import com.dollarsbank.dao.CustomerDao;
+import com.dollarsbank.dao.CustomerDaoImpl;
+
 public class Customer extends SavingsAccount
 {
 	private String custName;
 	private String custAddress;
 	private String contactNumber;
+	CustomerDaoImpl customerDao = new CustomerDaoImpl();
 	LocalDateTime ldt = LocalDateTime.now();
 	public Customer(String custName, String custAddress, String contactNumber, String userId, String password, double amount)
 	{
@@ -16,11 +20,15 @@ public class Customer extends SavingsAccount
 		this.contactNumber = contactNumber;
 		setUserId(userId);
 		setPassword(password);
-		deposit(amount);
-		addToHistory("Initial Deposit Amount in account ["+userId+"]\n"
-				+ "Balance - " + amount + " as of "  +ldt.getDayOfWeek()+" "
-				+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
-				+" " +" "+ldt.getYear());
+		setBalance(amount);
+		ldt = LocalDateTime.now();
+		if(customerDao.getHistory(getUserId()).size() == 0) {
+			addToHistory("Initial Deposit Amount in account ["+userId+"]\n"
+					+ "Balance - " + amount + " as of "  +ldt.getDayOfWeek()+" "
+					+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
+					+" " +" "+ldt.getYear());
+		}
+			
 	}
 	public Customer()
 	{

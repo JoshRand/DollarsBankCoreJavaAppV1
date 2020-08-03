@@ -20,7 +20,7 @@ public class DataGeneratorStubUtility
 				+ "|_|--------------------------------------------------------------------------------------\n|_|\n"
 				+ "|_| Recent Transactions\n";
 		
-		String stubMessageBody = transHistoryBody(cust.getTransactionHistory());
+		String stubMessageBody = transHistoryBody(cust.getHistory());
 		
 		String stubMessageFooter = "|_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_|\n";
 		fsu.saveFile(cust.getUserId(),stubMessageHeader+stubMessageBody+stubMessageFooter);

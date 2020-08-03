@@ -18,10 +18,10 @@ public class CustomerDaoImpl implements CustomerDao
 		
 		try 
 		{
-			System.out.println("trying to connect");
-			Class.forName("com.mysql.jdbc.Driver");
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/test","root","root");//
-			System.out.println("Connection working");
+			//System.out.println("trying to connect");
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/bankdatabase?autoReconnect=true&useSSL=false","root","root" );//
+			//System.out.println("Connection working");
 			return conn;
 		}
 		catch(Exception e) 
@@ -34,30 +34,22 @@ public class CustomerDaoImpl implements CustomerDao
 	}
 
 	@Override
-	public int update(Customer cust) 
+	public int updateBalance(String userId, double balance) 
 	{
 
-		//int id = e.getCustomerId();
-		List<Customer> list = new ArrayList<Customer>();
-		//list = getAllCustomer();
-		//try {
+		try {
 			Connection conn = getConnection();
 
-			//PreparedStatement pst = conn.prepareStatement("update usercrud set name=?, email=?, pass=?, cou=? where id="+id);
-//
-//			pst.setString(1, e.geteName());
-//			pst.setString(3, e.getPassword());	
-//			pst.setString(2, e.getEmail());
-//			pst.setString(4, e.getCountry());
-
-			//pst.executeUpdate();
-
-			System.out.println("updated to database");
-//		} catch (SQLException e1) {
-//	
-//			e1.printStackTrace();
-//			
-//		}
+			PreparedStatement pst = conn.prepareStatement("update account_details set balance=? where user_name=" +"'"+ userId+"'");
+			//System.out.println(balance);
+			pst.setDouble(1, balance);
+			pst.executeUpdate();
+			//System.out.println("updated to database");
+		} catch (SQLException e1) {
+	
+			e1.printStackTrace();
+			
+		}
 		return 0;
 	}
 
@@ -82,15 +74,25 @@ public class CustomerDaoImpl implements CustomerDao
 		//create prepared statement
 		try {
 			Connection conn = getConnection();
-			PreparedStatement pst = conn.prepareStatement("insert into usercrud(id,name,email,pass,cou)values(?,?,?,?,?)");
-//			pst.setInt(1, e.getEmpId());	
-//			pst.setString(2, e.geteName());	
-//			pst.setString(3, e.getPassword());
-//			pst.setString(4, e.getEmail());
-//			pst.setString(5, e.getCountry());
+			List<Customer> list = getAllAccounts();
+			for (Customer customer : list)
+			{
+				if(cust.getUserId().equals(customer.getUserId()))
+				{
+					return 0;
+				}
+			}
+			
+			PreparedStatement pst = conn.prepareStatement("insert into account_details(name,address,number,user_name,password,balance)values(?,?,?,?,?,?)");
+			pst.setString(1, cust.getCustName());	
+			pst.setString(2, cust.getCustAddress());	
+			pst.setString(3, cust.getContactNumber());
+			pst.setString(4, cust.getUserId());
+			pst.setString(5, cust.getPassword());
+			pst.setDouble(6, cust.getBalance());
 			
 			pst.executeUpdate();
-			System.out.println("saved to database");
+			//System.out.println("saved to database");
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -103,7 +105,7 @@ public class CustomerDaoImpl implements CustomerDao
 	public Customer getCustomerById(int id) {
 		Customer e = new Customer();
 		 try{  
-	            Connection con= CustomerDaoImpl.getConnection();  
+	            Connection con = CustomerDaoImpl.getConnection();  
 	            PreparedStatement ps=con.prepareStatement("select * from user905 where id=?");  
 	            ps.setInt(1,id);  
 	            ResultSet rs=ps.executeQuery();  
@@ -122,22 +124,62 @@ public class CustomerDaoImpl implements CustomerDao
 	}
 
 	@Override
-	public List<Customer> getAllCustomers() {
+	public List<Customer> getAllAccounts() {
 		// TODO Auto-generated method stub
 		List<Customer> list = new ArrayList<Customer>();
 		try {
 			Connection con = getConnection();
-			PreparedStatement pst = con.prepareStatement("select * from usercrud");
+			PreparedStatement pst = con.prepareStatement("select * from account_details");
 			ResultSet rs = pst.executeQuery();
 			
 			while (rs.next())
 			{	
-				System.out.println("adding employee to list");
-				//list.add(new Customer(rs.getInt(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5)));
+				//System.out.println("adding employee to list");
+				list.add(new Customer(rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getDouble(7)));
 				
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
+		}
+		return list;
+	}
+
+	@Override
+	public void saveHistory(String userId, String historyMessage)
+	{
+		try {
+			Connection conn = getConnection();
+			PreparedStatement pst = conn.prepareStatement("insert into accounthistory(userid,history)values(?,?)");
+			pst.setString(1, userId);	
+			pst.setString(2, historyMessage);
+			pst.executeUpdate();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			
+		}
+		
+	}
+
+	@Override
+	public List<String> getHistory(String userId)
+	{
+		List<String> list = new ArrayList<>();
+		try {
+		
+		Connection con = getConnection();
+		PreparedStatement pst = con.prepareStatement("select * from accounthistory where userid='"+userId+"'");
+		ResultSet rs = pst.executeQuery();
+		
+		while(rs.next())
+		{
+			list.add(rs.getString(3));
+		}
+		//System.out.println("TestinglistHistory: "+list.toString());
+		
+		
+		}catch (SQLException e) {
+		
 		}
 		return list;
 	}

@@ -1,0 +1,19 @@
+|_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_|
+|_|
+|_| Bank Stub
+|_|          ID: ujosh
+|_|        Name: Josh
+|_|     Balance: 14076.0
+|_|     Address: Josshwerw
+|_|     Contact: 202-232-2111
+|_|
+|_|--------------------------------------------------------------------------------------
+|_|
+|_| Recent Transactions
+|_| Deposited 123123.0 into account [ujosh]Balance - 246246.0 as of MONDAY AUGUST 3 15:51:38  2020
+|_| Withdrawn 222322.0 out of account [ujosh]Balance - 23924.0 as of MONDAY AUGUST 3 15:51:44  2020
+|_| Deposited 1234.0 into account [ujosh]Balance - 25158.0 as of MONDAY AUGUST 3 15:51:51  2020
+|_| Transfered 12313.0 into account [a] as of MONDAY AUGUST 3 15:51:57  2020
+|_| Deposited 1231.0 into account [ujosh]Balance - 14076.0 as of MONDAY AUGUST 3 15:52:18  2020
+|_|
+|_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_||_|

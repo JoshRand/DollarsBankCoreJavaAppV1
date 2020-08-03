@@ -8,6 +8,8 @@ import java.util.Scanner;
 
 import javax.naming.directory.InitialDirContext;
 
+import com.dollarsbank.dao.CustomerDao;
+import com.dollarsbank.dao.CustomerDaoImpl;
 import com.dollarsbank.model.Customer;
 import com.dollarsbank.utility.ConsolePrinterUtility;
 import com.dollarsbank.utility.DataGeneratorStubUtility;
@@ -17,14 +19,20 @@ public class DollarsBankController
 {
 	public EncryptionUtility en = new EncryptionUtility();
 	//Without a database using Static list/block to instantiate some users and init deposits
-	public static List<Customer> list = new ArrayList<Customer>();
+	//public static List<Customer> list = new ArrayList<Customer>();
+	CustomerDaoImpl cDaoImp = new CustomerDaoImpl();
 	static {
 		try {
 			EncryptionUtility en = new EncryptionUtility();
-			list.add(new Customer("Josh", "4003 Valley Green ct"
+			CustomerDaoImpl cDaoImp = new CustomerDaoImpl();
+			cDaoImp.save(new Customer("Josh", "4003 Poppy Green flort"
 					, "832-409-9637", "a", en.encrypt("a") , 30.2));
-			list.add(new Customer("mark", "Somewhere in AZ"
+			cDaoImp.save(new Customer("mark", "Somewhere in AZ"
 					, "832-222-5555", "b", en.encrypt("b"), 302222.2));
+//			list.add(new Customer("Josh", "4003 Valley Green ct"
+//					, "832-409-9637", "a", en.encrypt("a") , 30.2));
+//			list.add(new Customer("mark", "Somewhere in AZ"
+//					, "832-222-5555", "b", en.encrypt("b"), 302222.2));
 		}catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -36,29 +44,7 @@ public class DollarsBankController
 	public static DataGeneratorStubUtility dgsu = new DataGeneratorStubUtility();
 	Scanner scan = new Scanner(System.in);
 
-	private boolean passCheck(String password)
-	{
-		int grade = 0;
-		//length >= 8
-		if(password.length() >= 8)
-			grade++;
-		// contains at least 1 digit
-		if(password.matches("(?=.*[0-9]).*"))
-			grade++;
-		// contains at least 1 lower case
-		if(password.matches("(?=.*[a-z]).*"))
-			grade++;
-		// contains at least 1 upper case
-		if(password.matches("(?=.*[A-Z]).*"))
-			grade++;
-		// contains at least 1 special char
-		if(password.matches("(?=.*[~!@#$%^&*()_-]).*"))
-			grade++;
-		if(grade == 5)
-			return true;
-		else
-			return false;
-	}
+	
 	public Boolean run()
 	{
 
@@ -157,10 +143,10 @@ public class DollarsBankController
 				initalDeposit = scan.nextDouble();
 				scan.nextLine();
 				// Database
-				// custDao.addCustomer(new
+				cDaoImp.save(new Customer(name, address, contactNumber, userId, password, initalDeposit));
 				// Customer(name,address,contactNumber,userId,password,initalDeposit));
 				// ArrayList Collection
-				list.add(new Customer(name, address, contactNumber, userId, password, initalDeposit));
+				// list.add(new Customer(name, address, contactNumber, userId, password, initalDeposit));
 				
 			}
 			else 
@@ -179,6 +165,7 @@ public class DollarsBankController
 
 	public void login()
 	{
+		List<Customer> list = cDaoImp.getAllAccounts();
 		String userId = "";
 		String password = "";
 		boolean logout=false;
@@ -196,13 +183,12 @@ public class DollarsBankController
 				if (customer.getUserId().equalsIgnoreCase(userId) && en.decrypt(customer.getPassword()).equalsIgnoreCase(password))
 				{
 					System.out.println();
-					loginSuccess(iterator);
+					loginSuccess(customer.getUserId(),iterator);
 					logout = true;
 					break;
 				}
 			} catch (Exception e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			iterator++;
@@ -220,12 +206,13 @@ public class DollarsBankController
 		
 	}
 
-	public void loginSuccess(int iterator)
+	public void loginSuccess(String userId, int iterator) //with collections
 	{
+		List<Customer> list = cDaoImp.getAllAccounts();
 		boolean signOut = false;
 		double amount = 0;
 		int loginOption = 0;
-		list.get(iterator).toString();
+		list.get(iterator).toString(); 
 		while(!signOut)
 		{
 			
@@ -245,7 +232,10 @@ public class DollarsBankController
 							scan.nextLine();
 							if(amount >= 0)
 							{
+								//With collections
 								list.get(iterator).deposit(amount);
+								//database
+								cDaoImp.updateBalance(userId, list.get(iterator).getBalance());
 								System.out.println("Deposit successful, your current balance is: " + list.get(iterator).getBalance());
 								
 							}
@@ -265,6 +255,7 @@ public class DollarsBankController
 							if(amount >= 0 && amount <= list.get(iterator).getBalance())
 							{
 								list.get(iterator).withdraw(amount);
+								cDaoImp.updateBalance(userId, list.get(iterator).getBalance());
 								System.out.println("Withdraw successful, your current balance is: " + list.get(iterator).getBalance());
 								
 							}
@@ -279,14 +270,14 @@ public class DollarsBankController
 						int transferCount = 0;
 						int listPos = 0;
 						boolean transferable = false;
-						String userId = "";
+						String userId2 = "";
 						//funds transfer  EX: from a to b, or b to a
 						System.out.println("Who are you wanting to transfer with? User Id: ");
 						
-							userId = scan.nextLine().toLowerCase();
+							userId2 = scan.nextLine().toLowerCase();
 							for (Customer customer : list)
 							{
-								if(customer.getUserId().contentEquals(userId))
+								if(customer.getUserId().equalsIgnoreCase(userId2))
 								{
 									transferable = true;
 									listPos = transferCount ;
@@ -300,12 +291,14 @@ public class DollarsBankController
 								break;
 								
 							}
-							System.out.println("How much are you transfering to " + userId);
+							System.out.println("How much are you transfering to " + userId2);
 							amount = scan.nextDouble();
 							scan.nextLine();
 							if(amount >= 0 && amount <= list.get(iterator).getBalance())
 							{
 								list.get(listPos).deposit(list.get(iterator).transfer(amount,list.get(listPos).getUserId()));
+								cDaoImp.updateBalance(list.get(iterator).getUserId(), list.get(iterator).getBalance());
+								cDaoImp.updateBalance(list.get(listPos).getUserId(), list.get(listPos).getBalance());
 								System.out.println("Transfer successful, your current balance is: " + list.get(iterator).getBalance());
 								
 							}
@@ -320,6 +313,7 @@ public class DollarsBankController
 					case 4:
 						System.out.println();
 						list.get(iterator).printHistory();
+						
 						System.out.println();
 						break;
 					case 5:
@@ -345,7 +339,29 @@ public class DollarsBankController
 			
 		}
 	}
-
+	private boolean passCheck(String password)
+	{
+		int grade = 0;
+		//length >= 8
+		if(password.length() >= 8)
+			grade++;
+		// contains at least 1 digit
+		if(password.matches("(?=.*[0-9]).*"))
+			grade++;
+		// contains at least 1 lower case
+		if(password.matches("(?=.*[a-z]).*"))
+			grade++;
+		// contains at least 1 upper case
+		if(password.matches("(?=.*[A-Z]).*"))
+			grade++;
+		// contains at least 1 special char
+		if(password.matches("(?=.*[~!@#$%^&*()_-]).*"))
+			grade++;
+		if(grade == 5)
+			return true;
+		else
+			return false;
+	}
 	public void exit()
 	{
 		System.exit(0);

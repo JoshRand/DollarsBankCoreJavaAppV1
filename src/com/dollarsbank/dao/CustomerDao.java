@@ -6,11 +6,11 @@ import com.dollarsbank.model.Customer;
 
 public interface CustomerDao
 {
-	public int update(Customer e);
+	public int updateBalance(String userId, double balance) ;
 	public int delete(int id);
 	public int save(Customer e);
-	
+	public void saveHistory(String userId, String historyMessage);
 	public Customer getCustomerById(int id);
-	
-	public List<Customer> getAllCustomers();
+	public List<String> getHistory(String userId);
+	public List<Customer> getAllAccounts();
 }
