@@ -69,11 +69,11 @@ public class SavingsAccount extends Account
 	public double transfer(double amount, String receiverId)
 	{
 		ldt = LocalDateTime.now();
+		balance -= amount;
 		addToHistory("Transfered " + amount + " into account ["+receiverId+"]\n"
 				+ "as of " +ldt.getDayOfWeek()+" "
 				+ ldt.getMonth()+" "+ldt.getDayOfMonth()+" "+ ldt.getHour()+":"+ldt.getMinute()+":"+ldt.getSecond()
 				+" " +" "+ldt.getYear());
-		balance -= amount;
 		return amount;
 	}
 	public double getBalance()
